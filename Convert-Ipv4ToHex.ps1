@@ -29,7 +29,7 @@
     https://www.richardhicks.com/
 
 .NOTES
-    Version:        1.0
+    Version:        1.0.1
     Creation Date:  August 14, 2024
     Last Updated:   August 14, 2024
     Author:         Richard Hicks
@@ -81,7 +81,7 @@ Process {
         [PSCustomObject]@{
 
             IPv4 = $Address
-            Hex = $Result
+            Hex = $Result.ToLower()
 
         }
 
