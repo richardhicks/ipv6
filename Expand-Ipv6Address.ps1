@@ -23,7 +23,7 @@
     Expands the specified IPv6 address to its full 8-segment format. In this example the output would be '2001:0db8:0000:0000:0000:0000:0000:0001'.
 
 .LINK
-    https://github.com/richardhicks/ipv6/blob/master/Expand-Ipv6Address.ps1
+    https://github.com/richardhicks/ipv6/blob/main/Expand-Ipv6Address.ps1
 
 .LINK
     https://www.richardhicks.com/
