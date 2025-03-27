@@ -34,9 +34,9 @@
     https://www.richardhicks.com/
 
 .NOTES
-    Version:        1.0
+    Version:        1.1
     Creation Date:  August 14, 2024
-    Last Updated:   August 14, 2024
+    Last Updated:   March 26, 2025
     Author:         Richard Hicks
     Organization:   Richard M. Hicks Consulting, Inc.
     Contact:        rich@richardhicks.com
@@ -54,17 +54,24 @@ Param (
 
 )
 
-# Ensure the Ipv6 prefix specified is valid
+# Ensure the IPv6 prefix ends with '::'
 If ($Ipv6Prefix -notmatch '::$') {
 
-    Write-Warning 'Invalid IPv6 prefix.'
+    Write-Warning 'Invalid IPv6 prefix: must end with "::" to represent a /64.'
     Return
 
 }
 
+# Validate the prefix is a valid IPv6 address
 Try {
 
-    [System.Net.IPAddress]::Parse($Ipv6Prefix) | Out-Null
+    $Ip = [System.Net.IPAddress]::Parse($Ipv6Prefix)
+    If (-not $Ip.AddressFamily -eq [System.Net.Sockets.AddressFamily]::InterNetworkV6) {
+
+        Throw "Not an IPv6 address."
+
+    }
+
     Write-Verbose "$Ipv6Prefix is a valid IPv6 prefix."
 
 }
@@ -76,29 +83,36 @@ Catch {
 
 }
 
-# Remove any trailing colons from the Ipv6 prefix if it contains four hextets
-$Hextets = ($Ipv6Prefix.TrimEnd(':') -split ':') | Where-Object { $_ -ne '' } | Measure-Object | Select-Object -ExpandProperty Count
+# Count non-empty hextets (max 4 allowed for /64)
+$Hextets = ($Ipv6Prefix.TrimEnd(':') -split ':') | Where-Object { $_ -ne '' }
+If ($Hextets.Count -gt 4) {
 
-If ($Hextets -eq 4) {
+    Write-Warning 'Invalid IPv6 prefix: more than 64 bits (more than 4 hextets) specified.'
+    Return
+
+}
+
+# Ensure no trailing colon after adjustment
+If ($Hextets.Count -eq 4) {
 
     $Ipv6Prefix = $Ipv6Prefix -replace ':(?!.*:)', ''
 
 }
 
-# Create an array to store generated IPv6 addresses
+# Create array to store generated IPv6 addresses
 $Ipv6Addresses = @()
 
 # Generate the specified number of IPv6 addresses
 For ($i = 0; $i -lt $Count; $i++) {
 
-    # Create a random Ipv6 Interface Identifier
+    # Generate 64-bit Interface Identifier (16 hex characters)
     $Ipv6Iid = ( -Join ((48..57) + (65..70) | ForEach-Object { [Char]$_ } | Get-Random -Count 16)).ToLower()
     $Ipv6Iid = $Ipv6Iid -Replace '(.{4})(?!$)', '$1:'
 
-    # Build Ipv6 address
+    # Combine prefix and IID
     $Ipv6Address = $Ipv6Prefix.ToLower() + $Ipv6Iid
 
-    # Add to the output array
+    # Store in result array
     $Ipv6Addresses += [PSCustomObject]@{
 
         Ipv6Address = $Ipv6Address
