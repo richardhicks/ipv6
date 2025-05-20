@@ -18,7 +18,7 @@
     PSCustomObject
 
 .EXAMPLE
-    .\Convert-Ipv4ToHex.ps1 -Ipv4Address
+    .\Convert-Ipv4ToHex.ps1 -Ipv4Address 172.16.21.12
 
     Converts the specified IPv4 address to hexadecimal format.
 
@@ -29,9 +29,9 @@
     https://www.richardhicks.com/
 
 .NOTES
-    Version:        1.0.1
+    Version:        2.0
     Creation Date:  August 14, 2024
-    Last Updated:   August 14, 2024
+    Last Updated:   May 20, 2025
     Author:         Richard Hicks
     Organization:   Richard M. Hicks Consulting, Inc.
     Contact:        rich@richardhicks.com
@@ -43,7 +43,7 @@
 
 Param (
 
-    [Parameter(Mandatory, ValueFromPipeline, HelpMessage = 'Enter an IPv4 address.')]
+    [Parameter(Mandatory, ValueFromPipeline, HelpMessage = 'Enter an IPv4 address (e.g., 172.16.21.12).')]
     [string[]]$IPv4Address
 
 )
@@ -55,33 +55,36 @@ Process {
         # Validate IPv4 address
         Try {
 
-            # Attempt to parse the input IPv4 address
-            [System.Net.IPAddress]::Parse($Address) | Out-Null
+            [void]([System.Net.IPAddress]::Parse($Address))
 
         }
 
         Catch {
 
-            # If the input IPv4 address is invalid, display a warning message and exit
-            Write-Warning 'Invalid IPv4 address format.'
-            Return
+            Write-Warning "Invalid IPv4 address format: '$Address'."
+            Continue
 
         }
 
-        # Convert IPv4 address to hexadecimal
-        $Hex = $Address -Split '\.' | ForEach-Object { [Convert]::ToString($_, 16) }
+        # Split into octets
+        $Octets = $Address -split '\.' | ForEach-Object { [int]$_ }
 
-        # Output the hexadecimal value in the format xx:xx
-        $Result = "{0}{1}:{2}{3}" -f $Hex[0], $Hex[1], $Hex[2], $Hex[3]
+        # Combine first two and last two octets into 16-bit values
+        $FirstPair = ($Octets[0] -shl 8) + $Octets[1]
+        $SecondPair = ($Octets[2] -shl 8) + $Octets[3]
 
-        # Perform zero compression
-        $Result = $Result -Replace '0+', '0' -Replace '(?<=:)(0+)', ''
+        # Convert to hexadecimal without leading zeros
+        $HexFirst = [Convert]::ToString($FirstPair, 16)
+        $HexSecond = [Convert]::ToString($SecondPair, 16)
 
-        # Return the hexadecimal value as a custom object
+        # Combine into xxxx:xxxx format
+        $Result = "$HexFirst`:$HexSecond"
+
+        # Output as custom object
         [PSCustomObject]@{
 
             IPv4 = $Address
-            Hex = $Result.ToLower()
+            Hex  = $Result.ToLower()
 
         }
 
