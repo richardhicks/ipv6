@@ -1,13 +1,22 @@
 <Sysmon schemaversion="4.82">
   <DnsLookup>False</DnsLookup>
   <EventFiltering>
+    <!-- Log connections from a CLAT IPv4 address -->
     <NetworkConnect onmatch="include">
       <SourceIp condition="is any">192.0.0.1;192.0.0.2;192.0.0.3;192.0.0.4;192.0.0.5;192.0.0.6;192.0.0.7</SourceIp>
     </NetworkConnect>
+    <!-- Do not log local traffic: multicast, broadcast, and the CLAT range itself -->
     <NetworkConnect onmatch="exclude">
       <DestinationIp condition="begin with">224.</DestinationIp>
       <DestinationIp condition="begin with">239.</DestinationIp>
       <DestinationIp condition="is">255.255.255.255</DestinationIp>
+      <DestinationIp condition="is any">192.0.0.0;192.0.0.1;192.0.0.2;192.0.0.3;192.0.0.4;192.0.0.5;192.0.0.6;192.0.0.7</DestinationIp>
     </NetworkConnect>
+    <!-- Do not log other default event types; an empty include rule matches nothing -->
+    <ProcessCreate onmatch="include" />
+    <FileCreateTime onmatch="include" />
+    <ProcessTerminate onmatch="include" />
+    <DriverLoad onmatch="include" />
+    <RawAccessRead onmatch="include" />
   </EventFiltering>
 </Sysmon>
