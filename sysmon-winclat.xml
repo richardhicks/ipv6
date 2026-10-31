@@ -1,0 +1,13 @@
+<Sysmon schemaversion="4.82">
+  <DnsLookup>False</DnsLookup>
+  <EventFiltering>
+    <NetworkConnect onmatch="include">
+      <SourceIp condition="is any">192.0.0.1;192.0.0.2;192.0.0.3;192.0.0.4;192.0.0.5;192.0.0.6;192.0.0.7</SourceIp>
+    </NetworkConnect>
+    <NetworkConnect onmatch="exclude">
+      <DestinationIp condition="begin with">224.</DestinationIp>
+      <DestinationIp condition="begin with">239.</DestinationIp>
+      <DestinationIp condition="is">255.255.255.255</DestinationIp>
+    </NetworkConnect>
+  </EventFiltering>
+</Sysmon>
