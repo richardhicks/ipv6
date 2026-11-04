@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ViewerConfig>
+  <QueryConfig>
+    <QueryParams>
+      <Simple>
+        <Channel>Microsoft-Windows-IPxlatCfg/Operational</Channel>
+        <EventId>1106-1111</EventId>
+        <RelativeTimeInfo>0</RelativeTimeInfo>
+        <BySource>False</BySource>
+      </Simple>
+    </QueryParams>
+    <QueryNode>
+      <Name>WinCLAT</Name>
+      <Description>WinCLAT events</Description>
+      <QueryList>
+        <Query Id="0" Path="Microsoft-Windows-IPxlatCfg/Operational">
+          <Select Path="Microsoft-Windows-IPxlatCfg/Operational">*[System[(EventID &gt;= 1106 and EventID &lt;= 1111)]]</Select>
+        </Query>
+      </QueryList>
+    </QueryNode>
+  </QueryConfig>
+</ViewerConfig>
